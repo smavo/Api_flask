@@ -26,3 +26,19 @@ class Contact(db.Model):
 with app.app_context():
     db.create_all()
 
+
+# Crear Rutas
+@app.route('/contacts', methods=['GET'])
+def get_contacts():
+    contacts = Contact.query.all()
+    return jsonify({'contacts': [contact.serialize() for contact in contacts]})
+
+
+@app.route('/contacts', methods=['POST'])
+def create_contact():
+    data = request.get_json()
+    contact = Contact(name=data['name'], email=data['email'], phone=data['phone'])
+    db.session.add(contact)
+    db.session.commit()
+
+    return jsonify({'message': 'Contacto creado con éxito', 'contact': contact.serialize()}), 201
