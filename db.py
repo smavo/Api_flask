@@ -1,4 +1,4 @@
 
 
-stores = []
-items = []
+stores = {}
+items = {}
