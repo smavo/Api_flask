@@ -30,3 +30,4 @@ def create_app(db_url=None):
     api.register_blueprint(StoreBlueprint)
 
     return app
+
