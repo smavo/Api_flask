@@ -23,4 +23,6 @@ pip install python-dotenv
 https://marshmallow.readthedocs.io/en/stable/
 pip install -U marshmallow
 
-
+https://flask-jwt-extended.readthedocs.io/en/stable/
+https://pypi.org/project/Flask-JWT-Extended/
+pip install Flask-JWT-Extended
