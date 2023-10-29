@@ -20,7 +20,16 @@ class Store(MethodView):
     @blp.response(201, StoreSchema)
     def put(self, store_data, store_id):
         store = StoreModel.query.get(store_id)
-        raise NotImplementedError("Updating an item is not implemented.")
+
+        if store:
+            store.name = store_data["name"]
+        else:
+            store = StoreModel(id=store_id, **store_data)
+
+        db.session.add(store)
+        db.session.commit()
+
+        return store
 
     def delete(self, store_id):
         store = StoreModel.query.get_or_404(store_id)
