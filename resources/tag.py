@@ -53,10 +53,12 @@ class LinkTagsToItem(MethodView):
 
     @blp.arguments(TagSchema)
     @blp.response(200, TagSchema)
-    def put(self, tag_data, item_id, tag_id):  # Actualiza el nombre de una etiqueta existente.
-        tag = TagModel.query.filter_by(id=tag_id).first_or_404()
+    def put(self, tag_data, item_id, tag_id):
+        item = ItemModel.query.get_or_404(item_id)
+        tag = TagModel.query.get_or_404(tag_id)
 
-        tag.name = tag_data.get("name", tag.name)
+        if tag not in item.tags:
+            item.tags.append(tag)
 
         try:
             db.session.commit()
@@ -70,15 +72,18 @@ class LinkTagsToItem(MethodView):
         item = ItemModel.query.get_or_404(item_id)
         tag = TagModel.query.get_or_404(tag_id)
 
-        item.tags.remove(tag)
+        if tag in item.tags:
+            item.tags.remove(tag)
 
-        try:
-            db.session.add(item)
-            db.session.commit()
-        except SQLAlchemyError:
-            abort(500, message="An error occurred while inserting the tag.")
+            try:
+                db.session.add(item)
+                db.session.commit()
+            except SQLAlchemyError:
+                abort(500, message="An error occurred while inserting the tag.")
 
-        return {"message": "Item removed from tag", "item": item, "tag": tag}
+            return {"message": "Item removed from tag", "item": item, "tag": tag}
+        else:
+            abort(404, message="The provided tag is not associated with the item.")
 
 
 @blp.route("/tag/<string:tag_id>")
