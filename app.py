@@ -42,14 +42,12 @@ def update_store(store_id):
     if "name" not in store_data:
         abort(400, message="Bad request. Ensure 'name' is included in the JSON payload.")
 
-    if store_id not in stores:
+    try:
+        store = stores[store_id]
+        store["name"] = store_data["name"]
+        return store
+    except KeyError:
         abort(404, message="Store not found.")
-
-    existing_store = stores[store_id]
-    existing_store["name"] = store_data["name"]
-    stores[store_id] = existing_store
-
-    return existing_store
 
 
 @app.delete("/store/<string:store_id>")
