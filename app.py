@@ -9,7 +9,7 @@ from resources.tag import blp as TagBlueprint
 from flask_jwt_extended import JWTManager
 from resources.user import blp as UserBlueprint
 from blocklist import BLOCKLIST
-
+from flask_migrate import Migrate
 
 def create_app(db_url=None):
     app = Flask(__name__)
@@ -24,6 +24,7 @@ def create_app(db_url=None):
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url or os.getenv("DATABASE_URL", "sqlite:///data.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)
+    migrate = Migrate(app, db)
     api = Api(app)
 
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")

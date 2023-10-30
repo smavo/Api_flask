@@ -29,3 +29,8 @@ pip install Flask-JWT-Extended
 
 https://pypi.org/project/passlib/
 pip install passlib
+
+
+https://flask-migrate.readthedocs.io/en/latest/
+https://pypi.org/project/Flask-Migrate/
+pip install Flask-Migrate
