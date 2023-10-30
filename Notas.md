@@ -30,7 +30,6 @@ pip install Flask-JWT-Extended
 https://pypi.org/project/passlib/
 pip install passlib
 
-
 https://flask-migrate.readthedocs.io/en/latest/
 https://pypi.org/project/Flask-Migrate/
 pip install Flask-Migrate
@@ -44,3 +43,6 @@ flask db migrate -m "Initial migration."
 
 # Aplicar cambios de la migración
 flask db upgrade
+
+https://pypi.org/project/psycopg2/
+pip install psycopg2
