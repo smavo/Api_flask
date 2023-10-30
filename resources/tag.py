@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from db import db
 from models import TagModel, StoreModel, ItemModel
 from schemas import TagSchema, TagAndItemSchema
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt
 
 blp = Blueprint("Tags", "tags", description="Operations on tags")
 
@@ -74,6 +74,10 @@ class LinkTagsToItem(MethodView):
     @jwt_required()
     @blp.response(200, TagAndItemSchema)
     def delete(self, item_id, tag_id):  # Elimina la asociación entre un elemento y una etiqueta específica.
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required.")
+
         item = ItemModel.query.get_or_404(item_id)
         tag = TagModel.query.get_or_404(tag_id)
 
@@ -119,6 +123,10 @@ class Tag(MethodView):
     @blp.alt_response(404, description="Tag not found.")
     @blp.alt_response(400, description="Returned if the tag is assigned to one or more items. In this case, the tag is not deleted.",)
     def delete(self, tag_id):  # Elimina una etiqueta, pero solo si no está asociada a ningún elemento. En caso de que esté asociada a algún elemento, devuelve un error
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required.")
+
         tag = TagModel.query.get_or_404(tag_id)
 
         if not tag.items:

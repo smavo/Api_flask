@@ -5,15 +5,20 @@ from flask_jwt_extended import create_access_token
 from db import db
 from models import UserModel
 from schemas import UserSchema
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt
 
 blp = Blueprint("Users", "users", description="Operations on users")
 
 
 @blp.route("/register")
 class UserRegister(MethodView):
+    @jwt_required()
     @blp.arguments(UserSchema)
     def post(self, user_data):
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required.")
+
         if UserModel.query.filter(UserModel.username == user_data["username"]).first():
             abort(409, message="A user with that username already exists.")
 
@@ -30,12 +35,20 @@ class User(MethodView):
     @jwt_required()
     @blp.response(200, UserSchema)
     def get(self, user_id):
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required.")
+
         user = UserModel.query.get_or_404(user_id)
         return user
 
     @jwt_required()
     @blp.arguments(UserSchema)
     def put(self, user_data, user_id):
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required.")
+
         user = UserModel.query.get_or_404(user_id)
 
         if 'username' not in user_data:
@@ -55,6 +68,10 @@ class User(MethodView):
 
     @jwt_required()
     def delete(self, user_id):
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required.")
+
         user = UserModel.query.get_or_404(user_id)
         db.session.delete(user)
         db.session.commit()

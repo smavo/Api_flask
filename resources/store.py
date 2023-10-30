@@ -4,7 +4,7 @@ from models import StoreModel
 from schemas import StoreSchema, StoreUpdateSchema
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from db import db
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt
 
 blp = Blueprint("Stores", "stores", description="Operations on stores")
 
@@ -35,6 +35,10 @@ class Store(MethodView):
 
     @jwt_required()
     def delete(self, store_id):
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required.")
+
         store = StoreModel.query.get_or_404(store_id)
         db.session.delete(store)
         db.session.commit()
