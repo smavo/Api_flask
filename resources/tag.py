@@ -1,22 +1,24 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError
-
 from db import db
 from models import TagModel, StoreModel, ItemModel
 from schemas import TagSchema, TagAndItemSchema
+from flask_jwt_extended import jwt_required
 
 blp = Blueprint("Tags", "tags", description="Operations on tags")
 
 
 @blp.route("/store/<string:store_id>/tag")
 class TagsInStore(MethodView):
+    @jwt_required()
     @blp.response(200, TagSchema(many=True))
     def get(self, store_id):  # Recupera todas las etiquetas asociadas a una tienda específica.
         store = StoreModel.query.get_or_404(store_id)
 
         return store.tags.all()
 
+    @jwt_required()
     @blp.arguments(TagSchema)
     @blp.response(201, TagSchema)
     def post(self, tag_data, store_id):  # Crea una nueva etiqueta y la asocia a una tienda específica, si no existe ya una etiqueta con el mismo nombre en esa tienda.
@@ -36,6 +38,7 @@ class TagsInStore(MethodView):
 
 @blp.route("/item/<string:item_id>/tag/<string:tag_id>")
 class LinkTagsToItem(MethodView):
+    @jwt_required()
     @blp.response(201, TagSchema)
     def post(self, item_id, tag_id):  # Asocia una etiqueta existente a un elemento existente en la base de datos.
         item = ItemModel.query.get_or_404(item_id)
@@ -51,6 +54,7 @@ class LinkTagsToItem(MethodView):
 
         return tag
 
+    @jwt_required()
     @blp.arguments(TagSchema)
     @blp.response(200, TagSchema)
     def put(self, tag_data, item_id, tag_id):
@@ -67,6 +71,7 @@ class LinkTagsToItem(MethodView):
 
         return tag
 
+    @jwt_required()
     @blp.response(200, TagAndItemSchema)
     def delete(self, item_id, tag_id):  # Elimina la asociación entre un elemento y una etiqueta específica.
         item = ItemModel.query.get_or_404(item_id)
@@ -88,11 +93,13 @@ class LinkTagsToItem(MethodView):
 
 @blp.route("/tag/<string:tag_id>")
 class Tag(MethodView):
+    @jwt_required()
     @blp.response(200, TagSchema)
     def get(self, tag_id):  # Recupera información sobre una etiqueta específica.
         tag = TagModel.query.get_or_404(tag_id)
         return tag
 
+    @jwt_required()
     @blp.arguments(TagSchema)
     @blp.response(200, TagSchema)
     def put(self, tag_data, tag_id):  # Actualiza el nombre de una etiqueta específica.
@@ -107,6 +114,7 @@ class Tag(MethodView):
 
         return tag
 
+    @jwt_required()
     @blp.response(202, description="Deletes a tag if no item is tagged with it.", example={"message": "Tag deleted."},)
     @blp.alt_response(404, description="Tag not found.")
     @blp.alt_response(400, description="Returned if the tag is assigned to one or more items. In this case, the tag is not deleted.",)
