@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify
 from flask_smorest import Api
 from db import db
-
+from datetime import timedelta
 from resources.item import blp as ItemBlueprint
 from resources.store import blp as StoreBlueprint
 from resources.tag import blp as TagBlueprint
@@ -27,6 +27,9 @@ def create_app(db_url=None):
     api = Api(app)
 
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
+    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+
     jwt = JWTManager(app)
 
     @jwt.token_in_blocklist_loader
@@ -36,6 +39,10 @@ def create_app(db_url=None):
     @jwt.revoked_token_loader
     def revoked_token_callback(jwt_header, jwt_payload):
         return (jsonify({"description": "The token has been revoked.", "error": "token_revoked"}), 401,)
+
+    @jwt.needs_fresh_token_loader
+    def token_not_fresh_callback(jwt_header, jwt_payload):
+        return (jsonify({"description": "The token is not fresh.","error": "fresh_token_required", }), 401,)
 
     @jwt.additional_claims_loader
     def add_claims_to_jwt(identity):

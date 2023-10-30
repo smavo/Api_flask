@@ -11,7 +11,7 @@ blp = Blueprint("Stores", "stores", description="Operations on stores")
 
 @blp.route("/store/<string:store_id>")
 class Store(MethodView):
-    @jwt_required()
+    @jwt_required(fresh=True)  # @jwt_required(fresh=True)  --> para usar token refresh
     @blp.response(200, StoreSchema)
     def get(self, store_id):
         store = StoreModel.query.get_or_404(store_id)
