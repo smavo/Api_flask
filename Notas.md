@@ -34,3 +34,13 @@ pip install passlib
 https://flask-migrate.readthedocs.io/en/latest/
 https://pypi.org/project/Flask-Migrate/
 pip install Flask-Migrate
+
+
+# Esto creará una migración dentro de la carpeta de su proyecto.
+flask db init 
+
+# Genera la migración
+flask db migrate -m "Initial migration."
+
+# Aplicar cambios de la migración
+flask db upgrade
